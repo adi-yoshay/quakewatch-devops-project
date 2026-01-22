@@ -127,7 +127,7 @@ A Completed CronJob pod will appear every minute.
 kubectl apply -f quakewatch-hpa.yaml
 kubectl get hpa
 
-Expected:
+Expected example:
 quakewatch-hpa   Deployment/quakewatch-deployment   cpu: 0%/50%   2   5   2   <age>
 
 ------------------------------------------------------------
@@ -193,7 +193,8 @@ Branching Strategy:
 
 Pipeline tasks:
 - Install Python
-- Run pylint on all .py files
+- Install dependencies
+- Run pylint
 - Build Docker image (NOT pushed)
 
 Trigger:
@@ -203,6 +204,7 @@ on: push to any non-main branch
 6. GitHub Actions – CD Pipeline (Runs on main branch)
 
 Pipeline tasks:
+- Login to DockerHub
 - Build Docker image
 - Tag and push to DockerHub
 - Optionally update Helm chart image tag
