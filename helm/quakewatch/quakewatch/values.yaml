@@ -1,0 +1,29 @@
+# Default values for QuakeWatch Helm chart
+
+replicaCount: 2
+
+image:
+  repository: adiyoshay681/quakewatch
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  nodePort: 30080
+
+config:
+  APP_MESSAGE: "Hello from ConfigMap"
+  APP_MODE: "production"
+
+secret:
+  SECRET_TOKEN: "my-super-secret-token"
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPU: 50
+
+cron:
+  schedule: "*/1 * * * *"
+  image: "curlimages/curl:latest"
+

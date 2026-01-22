@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ .Release.Name }}-healthcheck
+  labels:
+    app: quakewatch
+spec:
+  schedule: "{{ .Values.cron.schedule }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: healthcheck
+              image: "{{ .Values.cron.image }}"
+              command:
+                - /bin/sh
+                - -c
+                - curl -sf http://{{ .Release.Name }}-service:5000/health || exit 1
+

@@ -1,8 +1,8 @@
 # QuakeWatch – DevOps Final Course Project
-Phase 1: Docker · Phase 2: Kubernetes
+Phase 1: Docker · Phase 2: Kubernetes · Phase 3: Helm + CI/CD + GitOps
 
 QuakeWatch is a Python Flask application that displays real-time and historical earthquake data using the USGS Earthquake API.
-This project demonstrates containerization (Phase 1) and Kubernetes deployment (Phase 2).
+This project demonstrates containerization (Phase 1), Kubernetes deployment (Phase 2), and Helm + CI/CD + GitOps automation (Phase 3).
 
 ------------------------------------------------------------
 Project Features
@@ -19,6 +19,9 @@ Project Features
   - ConfigMap + Secret
   - CronJob health check
   - Horizontal Pod Autoscaler (HPA)
+- Helm chart packaging
+- GitHub Actions CI/CD pipelines
+- GitOps automation using ArgoCD
 
 ------------------------------------------------------------
 Phase 1 – Docker
@@ -124,7 +127,7 @@ A Completed CronJob pod will appear every minute.
 kubectl apply -f quakewatch-hpa.yaml
 kubectl get hpa
 
-Expected example:
+Expected:
 quakewatch-hpa   Deployment/quakewatch-deployment   cpu: 0%/50%   2   5   2   <age>
 
 ------------------------------------------------------------
@@ -140,6 +143,93 @@ kubectl exec -it <pod> -- printenv | grep SECRET_TOKEN
 Expected:
 APP_MESSAGE=Hello from ConfigMap
 SECRET_TOKEN=my-super-secret-token
+
+------------------------------------------------------------
+Phase 3 – Helm, CI/CD & GitOps
+
+1. Helm Chart Packaging
+
+Package the chart:
+helm package helm/quakewatch
+
+Result:
+quakewatch-0.1.0.tgz
+
+------------------------------------------------------------
+2. Push Helm Chart to DockerHub (OCI Registry)
+
+docker login
+helm push quakewatch-0.1.0.tgz oci://registry-1.docker.io/adiyoshay681
+
+------------------------------------------------------------
+3. Install or Upgrade the Chart in Kubernetes
+
+helm upgrade --install quakewatch \
+  oci://registry-1.docker.io/adiyoshay681/quakewatch \
+  --version 0.1.0
+
+Check:
+kubectl get pods
+kubectl get svc
+
+------------------------------------------------------------
+4. GitHub Repository Structure
+
+https://github.com/adi-yoshay/quakewatch-devops-project
+
+Repository includes:
+- Application source code
+- Dockerfile
+- Kubernetes manifests
+- Helm chart
+- GitHub Actions workflows
+
+Branching Strategy:
+- main → protected branch (CD pipeline runs here)
+- feature/* → development branches (CI pipeline runs here)
+
+------------------------------------------------------------
+5. GitHub Actions – CI Pipeline (Runs on feature branches)
+
+Pipeline tasks:
+- Install Python
+- Run pylint on all .py files
+- Build Docker image (NOT pushed)
+
+Trigger:
+on: push to any non-main branch
+
+------------------------------------------------------------
+6. GitHub Actions – CD Pipeline (Runs on main branch)
+
+Pipeline tasks:
+- Build Docker image
+- Tag and push to DockerHub
+- Optionally update Helm chart image tag
+- ArgoCD automatically deploys updates
+
+Trigger:
+on: push to main
+
+------------------------------------------------------------
+7. GitOps with ArgoCD
+
+ArgoCD monitors the Helm chart directory:
+helm/quakewatch/
+
+Any change (values.yaml, templates/*.yaml, image tag) triggers automatic sync to Kubernetes.
+
+Example:
+- Change replicaCount in values.yaml
+- Commit & push
+- ArgoCD updates Deployment automatically
+
+------------------------------------------------------------
+Phase 3 Deliverables
+- Published Helm chart in OCI registry
+- Functional CI pipeline (pylint + Docker build)
+- Functional CD pipeline (DockerHub + ArgoCD sync)
+- GitOps flow updating the cluster automatically
 
 ------------------------------------------------------------
 Files Included
@@ -162,6 +252,21 @@ Phase 2:
 - quakewatch-cronjob.yaml
 - quakewatch-hpa.yaml
 
+Phase 3:
+- Helm Chart:
+  - Chart.yaml
+  - values.yaml
+  - templates/
+      - deployment.yaml
+      - service.yaml
+      - configmap.yaml
+      - secret.yaml
+      - cronjob.yaml
+      - hpa.yaml
+- Packaged Chart (quakewatch-0.1.0.tgz)
+- GitHub Actions Workflows (CI + CD)
+- ArgoCD GitOps configuration
+
 ------------------------------------------------------------
 Submission Includes:
 - Working Docker container
@@ -169,13 +274,14 @@ Submission Includes:
 - Service (NodePort)
 - Probes (liveness/readiness)
 - ConfigMap + Secret
-- CronJob
-- HPA autoscaling
-- All Kubernetes manifests
-- Combined README for Phases 1 & 2
+- CronJob + HPA
+- Helm chart (source + packaged)
+- CI pipeline (pylint + Docker build)
+- CD pipeline (DockerHub publish)
+- GitOps automation with ArgoCD
 
 ------------------------------------------------------------
 Author:
 adi-yoshay
-DevOps Final Course Project – Phase 1 & Phase 2
+DevOps Final Course Project – Phases 1, 2 & 3
 

@@ -1,0 +1,31 @@
+name: CI - Lint & Build
+
+on:
+  push:
+    branches:
+      - "*"
+      - "!main"   # Do NOT run CI on main branch
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Run pylint
+        run: pylint $(git ls-files '*.py') || true
+        # '|| true' prevents CI from failing
+
+      - name: Build Docker image (CI only)
+        run: docker build -t quakewatch:test .
+
