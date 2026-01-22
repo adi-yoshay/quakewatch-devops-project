@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: quakewatch-healthcheck
+spec:
+  schedule: "*/1 * * * *"   # Every 1 minute
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: healthcheck
+              image: curlimages/curl:latest
+              args:
+                - "-s"
+                - "-o"
+                - "/dev/null"
+                - "-w"
+                - "%{http_code}"
+                - "http://quakewatch-service:5000"
+          restartPolicy: OnFailure
+
